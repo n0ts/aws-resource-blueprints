@@ -34,7 +34,6 @@ inputs:
     description: There path to save this key.
     default: ~/.ssh/vpc-infrastructure.pem
 
-# Uncomment below for local mode
 dsl_definitions:
 
   aws_config: &AWS_CONFIG
@@ -53,7 +52,6 @@ node_templates:
       instance_type: { get_input: instance_type }
       parameters:
         placement: { get_property: [ demo_subnet, availability_zone ] }
-      # Uncomment below for local mode
       agent_config:
         install_method: none
       aws_config: *AWS_CONFIG
@@ -95,6 +93,18 @@ node_templates:
     relationships:
       - type: cloudify.aws.relationships.security_group_contained_in_vpc
         target: demo_vpc
+
+  demo_route_table:
+    type: cloudify.aws.nodes.RouteTable
+    properties:
+      aws_config: *AWS_CONFIG
+    relationships:
+      - type: cloudify.aws.relationships.routetable_contained_in_vpc
+        target: demo_vpc
+      - type: cloudify.aws.relationships.routetable_associated_with_subnet
+        target: demo_subnet
+      - type: cloudify.aws.relationships.route_table_to_gateway
+        target: demo_internet_gateway
 
   demo_internet_gateway:
     type: cloudify.aws.nodes.InternetGateway
